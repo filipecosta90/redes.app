@@ -57,6 +57,51 @@ app.controller('SNMP', function($scope, $http) {
 		};
 });
 
+app.controller('SNMP_FORM', function($scope, $http){
+		console.log(" Formulario SNMP Controller reporting for duty.");
+		$scope.submission = false;
+
+		$scope.formData = {};
+		// submission message doesn't show when page loads
+
+		// Updated code thanks to Yotam
+		var param = function(data) {
+		var returnString = '';
+		for (d in data){
+		if (data.hasOwnProperty(d))
+		returnString += d + '=' + data[d] + '&';
+		}
+		// Remove last ampersand and return
+		return returnString.slice( 0, returnString.length - 1 );
+		};
+		$scope.submitForm = function() {
+		console.log(" Form submited.");
+		$http({
+method : 'POST',
+url : 'php/snmpv2.php',
+data : param($scope.formData), // pass in data as strings
+headers : { 'Content-Type': 'application/x-www-form-urlencoded' } // set the headers so angular passing info as form data (not request payload)
+})
+.success(function(data) {
+		if (!data.success) {
+		// if not successful, bind errors to error variables
+		$scope.error_ip_address = data.errors.ip_address;
+		$scope.error_snmp_key = data.errors.snmp_key;
+		$scope.error_snmp_mib = data.errors.snmp_mib;
+		$scope.submissionMessage = data.messageError;
+		$scope.submission = true; //shows the error message
+		} else {
+		// if successful, bind success message to message
+                        $scope.data = data;
+                        $scope.submission_result = data; // Show result from server in our <pre></pre> element
+		
+$scope.submissionMessage = data.messageSuccess;
+		$scope.formData = {}; // form fields are emptied with this line
+		$scope.submission = true; //shows the success message
+		}
+		});
+};
+});
 
 /**
  * Controls the Blog

@@ -6,9 +6,10 @@
 /**
  * Main AngularJS Web Application
  */
-var app = angular.module('tutorialWebApp', [
+var app = angular.module('networkManagmentWebApp', [
 		'ngRoute'
 		]);
+
 
 /**
  * Configure the Routes
@@ -102,6 +103,90 @@ $scope.submissionMessage = data.messageSuccess;
 		});
 };
 });
+
+  app.controller('TicksCtrl', ['$scope' , '$interval', function ($scope, $interval) {
+    
+                console.log("Ticks Controller reporting for duty.");
+var maximum = document.getElementById('container').clientWidth / 2 || 300;
+    $scope.data = [[]];
+    $scope.labels = [];
+    $scope.options = {
+      animation: false,
+      showScale: false,
+      showTooltips: false,
+      pointDot: false,
+      datasetStrokeWidth: 0.5
+    };
+
+    // Update the dataset at 25FPS for a smoothly-animating chart
+    $interval(function () {
+      getLiveChartData();
+    }, 40);
+
+    function getLiveChartData () {
+      if ($scope.data[0].length) {
+        $scope.labels = $scope.labels.slice(1);
+        $scope.data[0] = $scope.data[0].slice(1);
+      }
+
+      while ($scope.data[0].length < maximum) {
+        $scope.labels.push('');
+        $scope.data[0].push(getRandomValue($scope.data[0]));
+      }
+    }
+
+  function getRandomValue (data) {
+    var l = data.length, previous = l ? data[l - 1] : 50;
+    var y = previous + Math.random() * 10 - 5;
+    return y < 0 ? 0 : y > 100 ? 100 : y;
+  }
+
+  }]);
+
+app.controller('TabsCtrl', function ($scope) {
+    $scope.labels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    $scope.active = true;
+    $scope.data = [
+      [65, 59, 90, 81, 56, 55, 40],
+      [28, 48, 40, 19, 96, 27, 100]
+    ];
+  });
+
+  app.controller('DataTablesCtrl', function ($scope) {
+                console.log("DataTables Controller reporting for duty.");
+    $scope.labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+    $scope.data = [
+      [65, 59, 80, 81, 56, 55, 40],
+      [28, 48, 40, 19, 86, 27, 90]
+    ];
+    $scope.colours = [
+      { // grey
+        fillColor: 'rgba(148,159,177,0.2)',
+        strokeColor: 'rgba(148,159,177,1)',
+        pointColor: 'rgba(148,159,177,1)',
+        pointStrokeColor: '#fff',
+        pointHighlightFill: '#fff',
+        pointHighlightStroke: 'rgba(148,159,177,0.8)'
+      },
+      { // dark grey
+        fillColor: 'rgba(77,83,96,0.2)',
+        strokeColor: 'rgba(77,83,96,1)',
+        pointColor: 'rgba(77,83,96,1)',
+        pointStrokeColor: '#fff',
+        pointHighlightFill: '#fff',
+        pointHighlightStroke: 'rgba(77,83,96,1)'
+      }
+    ];
+    $scope.randomize = function () {
+      $scope.data = $scope.data.map(function (data) {
+        return data.map(function (y) {
+          y = y + Math.random() * 10 - 5;
+          return parseInt(y < 0 ? 0 : y > 100 ? 100 : y);
+        });
+      });
+    };
+  });
+
 
 /**
  * Controls the Blog

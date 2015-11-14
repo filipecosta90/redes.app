@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+
+
+<!-- Vendor: Bootstrap Stylesheets http://getbootstrap.com -->
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+<link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+<!-- Our Website CSS Styles -->
+<link rel="stylesheet" href="../css/main.css">
+<link rel="stylesheet" href="../css/angular-chart.css" />
+
+</head>
+<!--[if lt IE 7]>
+<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
+your browser</a> to improve your experience.</p>
+<![endif]-->
+<body ng-app="examples">
+<div class="container"></div>
+<div id="container" class="container">
+  <div class="row" ng-controller="DataTablesCtrl">
+    <div class="col-lg-6 col-sm-12">
+      <div class="panel panel-default">
+        <div class="panel-heading">Chart Data</div>
+        <div class="panel-body">
+          <table class="table table-responsive table-condensed">
+            <tr>
+              <th ng-repeat="label in labels">{{label}}</th>
+            </tr>
+            <tr ng-repeat="dataSet in data">
+              <td ng-repeat="set in dataSet track by $index"><span style="text-align: right;">{{data[$parent.$index][$index]}}</span></td>
+            </tr>
+          </table>
+          <input ng-click="randomize()" value="Randomize" type="button" class="pull-right"/>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6 col-sm-12">
+      <div class="panel panel-default">
+        <div class="panel-heading">Reactive Chart</div>
+        <div class="panel-body">
+          <canvas id="tables" class="chart chart-line" data="data" labels="labels"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Vendor: Javascripts -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+<!-- Vendor: Angular, followed by our custom Javascripts -->
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-route.min.js"></script>
+
+<!-- Angular Chart Javascripts -->
+<script src="../js/Chart.js"></script>
+<script src="../js/angular-chart.min.js"></script>
+<script src="../js/angular-chart.js"></script>
+
+
+
+
+</body>
+
+</html>

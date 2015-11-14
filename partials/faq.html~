@@ -1,11 +1,11 @@
-<div id="container">
-	<div class="row" ng-controller="DataTablesCtrl">
-		<div class="col-lg-6 col-sm-12">
-		<div class="panel panel-default">
-		<div class="panel-heading">Chart Data</div>
-		<div class="panel-body">
-		<table class="table table-responsive table-condensed">
-		<tr>
+<div id="container" class="container">
+<div class="row" ng-controller="DataTablesCtrl">
+<div class="col-lg-6 col-sm-12">
+<div class="panel panel-default">
+<div class="panel-heading">Chart Data</div>
+<div class="panel-body">
+<table class="table table-responsive table-condensed">
+<tr>
 <th ng-repeat="label in labels">{{label}}</th>
 </tr>
 <tr ng-repeat="dataSet in data">
@@ -21,7 +21,6 @@
 <div class="panel-heading">Reactive Chart</div>
 <div class="panel-body">
 <canvas id="tables" class="chart chart-line" data="data" labels="labels"></canvas>
-</div>
 </div>
 </div>
 </div>

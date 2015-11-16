@@ -6,7 +6,7 @@
 /**
  * Main AngularJS Web Application
  */
-var app = angular.module('networkManagmentWebApp', ['ngRoute']);
+var app = angular.module('networkManagmentWebApp', ['ngRoute', 'nvd3ChartDirectives']);
 
 /**
  * Configure the Routes

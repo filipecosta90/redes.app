@@ -36,6 +36,7 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
   $scope.initial_measured = false;
   $scope.measured_time = 0;
   $scope.measured_value = 0;
+  $scope.dataCounter = 0;
 
   $scope.calculateKeys = function () {
     $scope.keys.push("foo");
@@ -44,19 +45,17 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
     $scope.graphData.push({ "key": "bar", "values": [] });
   };
 
-  $scope.dataCounter = 0;
-
   $scope.graphs = [
-  {
-    "name": "Foos Only",
-      "height": 300,
-      "series": [ { label: 'Foo', key: 'foo', enabled: true } ]
-  },
-  {
-    "name": "Bars Only",
+{
+  "name": "Foos Only",
     "height": 300,
-    "series": [ { label: 'Bar', key: 'bar', enabled: true } ]
-  }
+    "series": [ { label: 'Foo', key: 'foo', enabled: true } ]
+},
+{
+  "name": "Bars Only",
+  "height": 300,
+  "series": [ { label: 'Bar', key: 'bar', enabled: true } ]
+}
 ];
 
 var param = function(data) {
@@ -181,7 +180,6 @@ return svg.transition()
     };
   }
   };
-})
 
 });
 

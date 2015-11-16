@@ -1,92 +1,48 @@
-<div class="container">
 
-<div id="formulario" ng-controller="SNMP_FORM">
-<form ng-submit="submitForm()">
-  <label for="name">ipAddress</label>
-  <input type="text" name="ip_address" ng-model="formData.ip_address" ng-class="{'error' : error_ip_address}">
-  <label for="email">SNMP Key</label>
-  <input type="text" name="snmp_key" ng-model="formData.snmp_key" ng-class="{'error' : error_snmp_mib}">
-  <label for="message">SNMP MIB</label>
-  <input type="text" name="snmp_mib" value="1.1" ng-model="formData.snmp_mib" ng-class="{'error' : error_snmp_mib}">
- <label for="message">SNMP TIME TRACKING MIB</label>
-  <input type="text" name="snmp_mib_time" value="SNMPv2-MIB::sysUpTime.0" ng-model="formData.snmp_mib_time" ng-class="{'error' : error_snmp_mib_time}">
- <input type="submit" value="Send!" name="submit">
-  <div ng-class="{'submissionMessage' : submission}" ng-bind="submissionMessage"></div>
-</form>
+<div ng-controller="snmp_controller">
+<button ng-click="start()">Start Fetching</button>
+<button ng-click="stop()">Stop Fetching</button>
+<button ng-click="clear()">Clear Data</button>
+
+<br/>
+
+<label for="name">ipAddress</label>
+<input type="text" name="ip_address" ng-model="formData.ip_address" ng-class="{'error' : error_ip_address}">
+
+<label for="email">SNMP Key</label>
+<input type="text" name="snmp_key" ng-model="formData.snmp_key" ng-class="{'error' : error_snmp_mib}">
+
+<label for="message">SNMP MIB</label>
+<input type="text" name="snmp_mib" value="1.1" ng-model="formData.snmp_mib" ng-class="{'error' : error_snmp_mib}">
+
+<label for="message">SNMP TIME TRACKING MIB</label>
+<input type="text" name="snmp_mib_time" value="SNMPv2-MIB::sysUpTime.0" ng-model="formData.snmp_mib_time" ng-class="{'error' : error_snmp_mib_time}">
+
+<div ng-class="{'submissionMessage' : submission}" ng-bind="submissionMessage"></div>
 <pre ng-model="result">
 {{submission_result}}
 </pre>
+
+<div ng-repeat="graph in graphs">
+  <nvd3-line-chart
+  data="graphData"
+  filtername="'graphDataFilter'"
+  filtervalue="graph.series"
+  id="graph_line_{{$index}}"
+  height="{{graph.height}}"
+  width="800"
+  showxaxis="true"
+  showyaxis="true"
+  forcey="[0]"
+  tooltips="true"
+  interactive="true"
+  margin="{left:50,top:50,bottom:50,right:50}"
+  showlegend="true"
+  legendupdatestate="false"
+  objectequality="true"
+  nodata="Fetching statistics...">
+  <extended-chart><svg></svg></extended-chart>
+  </nvd3-line-chart>
 </div>
 
-<script>
-var n = 60,
-    random = d3.random.normal(0, 0),
-    data = d3.range(n).map(random);
-
-var margin = {top: 20, right: 20, bottom: 20, left: 40},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
-
-var x = d3.scale.linear()
-    .domain([0, n - 1])
-    .range([0, width]);
-
-var y = d3.scale.linear()
-    .domain([0, 5])
-    .range([height, 0]);
-
-var line = d3.svg.line()
-    .x(function(d, i) { return x(i); })
-    .y(function(d, i) { return y(d); });
-
-var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-svg.append("defs").append("clipPath")
-    .attr("id", "clip")
-  .append("rect")
-    .attr("width", width)
-    .attr("height", height);
-
-svg.append("g")
-    .attr("class", "x axis")
-    .attr("transform", "translate(0," + y(0) + ")")
-    .call(d3.svg.axis().scale(x).orient("bottom"));
-
-svg.append("g")
-    .attr("class", "y axis")
-    .call(d3.svg.axis().scale(y).orient("left"));
-
-var path = svg.append("g")
-    .attr("clip-path", "url(#clip)")
-  .append("path")
-    .datum(data)
-    .attr("class", "line")
-    .attr("d", line);
-
-tick();
-
-function tick() {
-	var newData = 2;
-  // push a new data point onto the back
-  data.push(newData);
-  // redraw the line, and slide it to the left
-  path
-      .attr("d", line)
-      .attr("transform", null)
-    .transition()
-      .duration(1000)
-      .ease("linear")
-      .attr("transform", "translate(" + x(-1) + ",0)")
-      .each("end", tick);
-
-  // pop the old data point off the front
-  data.shift();
-}
-</script>
-
 </div>
-<!-- /.container -->

@@ -6,7 +6,7 @@
 /**
  * Main AngularJS Web Application
  */
-var app = angular.module('networkManagmentWebApp', ['ngRoute','nvd3ChartDirectives']);
+var app = angular.module('networkManagmentWebApp', ['ngRoute']);
 
 /**
  * Configure the Routes
@@ -21,6 +21,19 @@ app.config(['$routeProvider', function ($routeProvider) {
   // else 404
   .otherwise("/404", {templateUrl: "partials/404.html", controller: "PageCtrl"});
 }]);
+
+
+/**
+ * Controls all other Pages
+ */
+app.controller('PageCtrl', function (/* $scope, $location, $http */) {
+		console.log("Page Controller reporting for duty.");
+
+		// Activates the Carousel
+		$('.carousel').carousel({
+interval: 5000
+}); 
+});
 
 
 /**
@@ -182,6 +195,5 @@ return svg.transition()
   };
 
 });
-
 
 

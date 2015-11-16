@@ -25,6 +25,24 @@
 <link rel="stylesheet" href="css/main.css">
 <link rel="stylesheet" href="css/angular-chart.css" />
 
+<style>
+svg {
+  font: 10px sans-serif;
+}
+.line {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+</style>
+
+
 </head>
 <body ng-app="networkManagmentWebApp">
 <!--[if lt IE 7]>
@@ -45,13 +63,12 @@ your browser</a> to improve your experience.</p>
 <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-route.min.js"></script>
 
-<!-- Angular Chart Javascripts -->
-<script src="js/Chart.js"></script>
-<script src="js/angular-chart.min.js"></script>
-<script src="js/angular-chart.js"></script>
-
 <!-- Our Website Javascripts -->
 <script src="js/main.js"></script>
 
+<!-- D3 JS Chart -->
+<script src="//d3js.org/d3.v3.min.js"></script>
 </body>
 </html>
+
+

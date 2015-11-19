@@ -1,11 +1,13 @@
 
+<div class="container"> 
 <div ng-controller="snmp_controller">
+<br/>
 <button ng-click="start()">Start Fetching</button>
 <button ng-click="stop()">Stop Fetching</button>
 <button ng-click="clear()">Clear Data</button>
 
 <br/>
-
+<br/>
 <label for="name">ipAddress</label>
 <input type="text" name="ip_address" ng-model="formData.ip_address" ng-class="{'error' : error_ip_address}">
 
@@ -22,7 +24,6 @@
 <pre ng-model="result">
 {{submission_result}}
 </pre>
-
 <div ng-repeat="graph in graphs">
   <nvd3-line-chart
   data="graphData"
@@ -44,5 +45,5 @@
   <extended-chart><svg></svg></extended-chart>
   </nvd3-line-chart>
 </div>
-
+</div>
 </div>

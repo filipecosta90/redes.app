@@ -107,6 +107,7 @@ $scope.fetchSNMP = function() {
       if ($scope.initial_measured == false) {
         console.log('\t$scope.initial_measured = false ');
         $scope.measured_time = angular.fromJson(data.snmp_time);
+        $scope.initial_measured = true;
       }
 
 

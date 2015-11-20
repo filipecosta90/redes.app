@@ -1,19 +1,48 @@
 #!/usr/bin/perl 
+use strict;
+use warnings;
 
-use Net::SNMP; 
+use Data::Dumper;
+use JSON;
+use CGI;
+my $query = CGI->new;
 
-# requires a hostname and a community string as its arguments
-($session,$error) = Net::SNMP->session(Hostname => $ARGV[0],
-                                       Community => $ARGV[1]);
+my %data;
+my %errors;
 
-die "session error: $error" unless ($session);
+if ( defined( $query->param('ip_address') ) ) {
+	my $ip_address = $query->param('ip_address');
+}	
+else {
+	$errors{'ip_address'} = 'ipAddress is required.';
+}
 
-# iso.org.dod.internet.mgmt.mib-2.interfaces.ifNumber.0 = 
-#   1.3.6.1.2.1.2.1.0
-$result = $session->get_request("1.3.6.1.2.1.2.1.0");
+if ( defined( $query->param('snmp_key') ) ) {
+	my $snmp_key = $query->param('snmp_key');
+}	
+else {
+	$errors{'snmp_key'} = 'SNMP Key is required.';
+}
+if ( defined( $query->param('snmp_mib') ) ) {
+	my @snmp_mib = $query->param('snmp_mib');
+}	
+else {
+	$errors{'snmp_mib'} = 'SNMP MIB is required.';
+}
+if ( defined( $query->param('snmp_mib_time') ) ) {
+	my $snmp_mib_time = $query->param('snmp_mib_time');
+}	
+else {
+	$errors{'snmp_mib_time'} = 'SNMP MIB for time tracking is required.';
+}
 
-die "request error: ".$session->error unless (defined $result);
+if ( %errors ) {
+	$data{'success'} = 'false';
+	$data{'errors'} = \%errors;
+	$data{'messageError'} = 'Please check the fields in red';	
+} 
 
-$session->close;
+my $response = encode_json( { %data } );
 
-print "Number of interfaces: ".$result->{"1.3.6.1.2.1.2.1.0"}."\n";
+print $query->header("application/json");
+print $response;

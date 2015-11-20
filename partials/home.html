@@ -3,6 +3,7 @@
 <div ng-controller="snmp_controller">
 <br/>
 <button ng-click="start()">Start Fetching</button>
+<button ng-click="fetch_inteval()">Auto Determine Time Interval</button>
 <button ng-click="stop()">Stop Fetching</button>
 <button ng-click="clear()">Clear Data</button>
 
@@ -41,7 +42,7 @@
   showlegend="true"
   legendupdatestate="false"
   objectequality="true"
-  nodata="Fetching statistics...">
+  nodata="No data to present...">
   <extended-chart><svg></svg></extended-chart>
   </nvd3-line-chart>
 </div>

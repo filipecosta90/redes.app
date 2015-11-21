@@ -15,14 +15,51 @@ my %data;
 my %errors;
 my @response;
 
-my $ip_address='127.0.0.1';
-my $snmp_key='public';
-my @snmp_oids = ('1.3.6.1.2.1.1.3' , '1.3.6.1.2.1.4.3' );
+my $ip_address;
+my $snmp_key;
+my @snmp_oids =  ( '1.3.6.1.2.1.4.3' );
 my $snmp_mib_time='1.3.6.1.2.1.1.3';
 
 my $session;
 my $error;
 
+if ( defined( $query->param('ip_address') ) ) {
+        $ip_address = $query->param('ip_address');
+}
+else {
+        $errors{'ip_address'} = 'ipAddress is required.';
+}
+
+if ( defined( $query->param('snmp_key') ) ) {
+        $snmp_key = $query->param('snmp_key');
+}
+else {
+        $errors{'snmp_key'} = 'SNMP Key is required.';
+}
+if ( defined( $query->param('snmp_oids') ) ) {
+        @snmp_oids = $query->param('snmp_oids');
+}
+else {
+        $errors{'snmp_oids'} = 'At least one SNMP OID is required.';
+}
+if ( defined( $query->param('snmp_mib_time') ) ) {
+        $snmp_mib_time = $query->param('snmp_mib_time');
+}
+else {
+        $errors{'snmp_mib_time'} = 'SNMP MIB for time tracking is required.';
+}
+
+if ( %errors ) {
+        $data{'success'} = 'false';
+        $data{'errors'} = \%errors;
+        $data{'messageError'} = 'Please check the fields in red';
+        my $json_response = encode_json( { %data } );
+        print $query->header("application/json");
+        print $json_response;
+
+}
+
+else {
 ($session, $error) = Net::SNMP->session(
 		-hostname => $ip_address,
 		-version => 'snmpv2c',
@@ -60,7 +97,5 @@ else{
 				$session->var_bind_list()->{$_},
 		      );
 	}
-
-
 }
-
+}

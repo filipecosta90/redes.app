@@ -1,15 +1,19 @@
-#!/usr/bin/perl 
+#!/usr/bin/perl  
 use strict;
 use warnings;
 
 use Data::Dumper;
 use JSON;
 use CGI;
+use CGI::Carp 'fatalsToBrowser';
+use Net::SNMP qw(:snmp);
+use DB;
+
 my $query = CGI->new;
 
 my %data;
 my %errors;
-my $response;
+my @response;
 
 my $ip_address;
 my $snmp_key;
@@ -52,7 +56,10 @@ if ( %errors ) {
 
 } 
 else {
-	my ($session, $error) = Net::SNMP->session(
+	my $session;
+	my $error;
+
+	($session, $error) = Net::SNMP->session(
 			-hostname => $ip_address,
 			-version => 'snmpv2c',
 			-community => $snmp_key
@@ -71,15 +78,42 @@ else {
 
 	}
 	else{
-		$response = $session->get_bulk_request (
-				-nonrepeaters => '1',
-				-maxrepetitions => scalar @snmp_oids,
-				-varbindlist     => \@snmp_oids
-				);
-		$session->close();
-		my $json_response = encode_json( { $response } );
-		print $query->header("application/json");
-		print $json_response;
+		my @args;	
+		push(@args, -varbindlist => \@snmp_oids);
+		push(@args, -maxrepetitions => scalar @snmp_oids); 
+		my @response = $session->get_bulk_request(@args);
+
+
+outer: while (defined($session->get_bulk_request(@args))) {
+
+	       my @oids = oid_lex_sort(keys(%{$session->var_bind_list()}));
+
+	       foreach (@oids) {
+
+		       printf(
+				       "%s = %s: %s\n", $_, 
+				       snmp_type_ntop($session->var_bind_types()->{$_}),
+				       $session->var_bind_list()->{$_},
+			     );
+
+# Make sure we have not hit the end of the MIB
+		       if ($session->var_bind_list()->{$_} eq 'endOfMibView') { last outer; } 
+	       }
+
+# Get the last OBJECT IDENTIFIER in the returned list
+	       @args = (-maxrepetitions => 25, -varbindlist => [pop(@oids)]);
+       }
+
 	}
+
+#		$response = $session->get_bulk_request (
+#				-nonrepeaters => '1',
+#				-maxrepetitions => scalar @snmp_oids,
+#				-varbindlist     => \@snmp_oids
+#				);
+#		$session->close();
+#		my $json_response = encode_json( { $response } );
+#		print $query->header("application/json");
+#		print $json_response;
 }
 

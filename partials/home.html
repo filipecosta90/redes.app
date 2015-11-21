@@ -13,10 +13,10 @@
 <input type="text" name="ip_address" ng-model="formData.ip_address" ng-class="{'error' : error_ip_address}">
 
 <label for="email">SNMP Key</label>
-<input type="text" name="snmp_key" ng-model="formData.snmp_key" ng-class="{'error' : error_snmp_mib}">
+<input type="text" name="snmp_key" ng-model="formData.snmp_key" ng-class="{'error' : error_snmp_key}">
 
 <label for="message">SNMP MIB</label>
-<input type="text" name="snmp_mib" value="1.1" ng-model="formData.snmp_mib" ng-class="{'error' : error_snmp_mib}">
+<input type="text" name="snmp_oids" value="1.1" ng-model="formData.snmp_oids" ng-class="{'error' : error_snmp_oids}">
 
 <label for="message">SNMP TIME TRACKING MIB</label>
 <input type="text" name="snmp_mib_time" value="SNMPv2-MIB::sysUpTime.0" ng-model="formData.snmp_mib_time" ng-class="{'error' : error_snmp_mib_time}">

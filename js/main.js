@@ -1,5 +1,5 @@
 /**
- * AngularJS Network Managment Assignment1
+ * AngularJS Network Managment Assignment 2
  * @author Filipe Oliveira <a57816@alunos.uminho.pt>
  */
 
@@ -84,7 +84,7 @@ var param = function(data) {
 $scope.fetchSNMP = function() {
   $http({
     method : 'POST',
-    url : 'php/snmpv2.php',
+    url : 'perl/snmp.pl',
     data : param($scope.formData), // pass in data as strings
     headers : { 'Content-Type': 'application/x-www-form-urlencoded' } // set the headers so angular passing info as form data (not request payload)
   })
@@ -93,7 +93,7 @@ $scope.fetchSNMP = function() {
       // if not successful, bind errors to error variables
       $scope.error_ip_address = data.errors.ip_address;
       $scope.error_snmp_key = data.errors.snmp_key;
-      $scope.error_snmp_mib = data.errors.snmp_mib;
+      $scope.error_snmp_oids = data.errors.snmp_oids;
       $scope.submissionMessage = data.messageError;
       $scope.submission = true; //shows the error message
     } else {
@@ -110,11 +110,10 @@ $scope.fetchSNMP = function() {
         $scope.initial_measured = true;
       }
 
-
       $scope.data = data;
       var snmp_time = angular.fromJson(data.snmp_time);
       var snmp_label_time = data.snmp_label_time.toString();
-      var snmp_data = angular.fromJson (data.snmp_data); 
+      var snmp_data = angular.fromJson (data.snmp_data);
       var snmp_label_data = data.snmp_label_data.toString();
       console.log( snmp_label_time + " : "+snmp_time + "\t"+ snmp_label_data + " : " + snmp_data );
       var timeDiff = snmp_time - $scope.measured_time;
@@ -135,7 +134,6 @@ $scope.clear = function(){
   $scope.dataCounter = 0;
   $scope.keys = [];
   $scope.graphData = [];
-
   $scope.calculateKeys();
 };
 

@@ -65,7 +65,10 @@ else {
 	($session, $error) = Net::SNMP->session(
 			-hostname => $ip_address,
 			-version => 'snmpv2c',
-			-community => $snmp_key
+			-community => $snmp_key,
+			-translate   => [
+			-timeticks => 0x0   # Turn off so sysUpTime is numeric
+			]  
 			);
 
 	if (!defined $session) {
@@ -89,15 +92,14 @@ else {
 		push (@args, -maxrepetitions => 1  ); 
 
 		$session->get_bulk_request(@args);
-
+                print $query->header("application/json");
 		my @oids = oid_lex_sort(keys(%{$session->var_bind_list()}));
 
 		foreach (@oids) {
-			printf(
-					"%s = %s: %s\n", $_, 
-					snmp_type_ntop($session->var_bind_types()->{$_}),
-					$session->var_bind_list()->{$_},
-			      );
+			my $oid_key = $_;
+			my $string = $session->var_bind_list()->{$_};
+			my $response = encode_json( { $oid_key => "$string" });
+			print $response;
 		}
 	}
 }

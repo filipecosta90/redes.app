@@ -12,14 +12,14 @@ var app = angular.module('networkManagmentWebApp', ['ngRoute', 'nvd3ChartDirecti
  * Configure the Routes
  */
 app.config(['$routeProvider', function ($routeProvider) {
-  $routeProvider
-  // Home
-  .when("/", {templateUrl: "partials/home.html", controller: "PageCtrl"})
-  // Pages
-  .when("/about", {templateUrl: "partials/about.html", controller: "PageCtrl"})
-  .when("/contact", {templateUrl: "partials/contact.html", controller: "PageCtrl"})
-  // else 404
-  .otherwise("/404", {templateUrl: "partials/404.html", controller: "PageCtrl"});
+	$routeProvider
+	// Home
+	.when("/", {templateUrl: "partials/home.html", controller: "PageCtrl"})
+	// Pages
+	.when("/about", {templateUrl: "partials/about.html", controller: "PageCtrl"})
+	.when("/contact", {templateUrl: "partials/contact.html", controller: "PageCtrl"})
+	// else 404
+	.otherwise("/404", {templateUrl: "partials/404.html", controller: "PageCtrl"});
 }]);
 
 
@@ -27,180 +27,197 @@ app.config(['$routeProvider', function ($routeProvider) {
  * Controls all other Pages
  */
 app.controller('PageCtrl', function (/* $scope, $location, $http */) {
-  console.log("Page Controller reporting for duty.");
+	console.log("Page Controller reporting for duty.");
 
-  // Activates the Carousel
-  $('.carousel').carousel({
-    interval: 5000
-  }); 
+	// Activates the Carousel
+	$('.carousel').carousel({
+		interval: 5000
+	}); 
 });
-
 
 /**
  * Controls the SNMP PHP REQUEST
  */
 app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
-  console.log(" Formulario SNMP Controller reporting for duty.");
-  $scope.submission = false;
-  $scope.formData = {};
-  $scope.dataCounter = 0;
-  $scope.keys = [];
-  $scope.graphData = [];
-  $scope.initial_measured = false;
-  $scope.measured_time = 0;
-  $scope.measured_value = 0;
-  $scope.dataCounter = 0;
+	console.log(" Formulario SNMP Controller reporting for duty.");
+	$scope.submission = false;
+	$scope.formData = {};
+	$scope.dataCounter = 0;
+	$scope.keys = [];
+	$scope.graphData = [];
+	$scope.initial_measured = false;
+	$scope.measured_time = 0;
+	$scope.measured_value = 0;
+	$scope.dataCounter = 0;
+	$scope.formData.ip_address = 'localhost';
+	$scope.formData.snmp_key = 'public';
+	$scope.formData.snmp_oids = ['1.3.6.1.2.1.4.3','1.3.6.1.2.1.4.3'];
 
-  $scope.calculateKeys = function () {
-    $scope.keys.push("foo");
-    $scope.keys.push("bar");
-    $scope.graphData.push({ "key": "foo", "values": [] });
-    $scope.graphData.push({ "key": "bar", "values": [] });
-  };
+	$scope.addNewMib = function() {
+		$scope.formData.snmp_oids.push("");
+	};
 
-  $scope.graphs = [
-{
-  "name": "Foos Only",
-    "height": 300,
-    "series": [ { label: 'Foo', key: 'foo', enabled: true } ]
-},
-{
-  "name": "Bars Only",
-  "height": 300,
-  "series": [ { label: 'Bar', key: 'bar', enabled: true } ]
-}
-];
-
-var param = function(data) {
-  var returnString = '';
-  for (d in data){
-    if (data.hasOwnProperty(d))
-      returnString += d + '=' + data[d] + '&';
-  }
-  // Remove last ampersand and return
-  return returnString.slice( 0, returnString.length - 1 );
-};
-
-$scope.fetchSNMP = function() {
-  $http({
-    method : 'POST',
-    url : 'cgi-bin/snmp.pl',
-    data : param($scope.formData), // pass in data as strings
-    headers : { 'Content-Type': 'application/x-www-form-urlencoded' } // set the headers so angular passing info as form data (not request payload)
-  })
-  .success(function(data) {
-    if (!data.success) {
-      // if not successful, bind errors to error variables
-      $scope.error_ip_address = data.errors.ip_address;
-      $scope.error_snmp_key = data.errors.snmp_key;
-      $scope.error_snmp_mib = data.errors.snmp_mib;
-      $scope.submissionMessage = data.messageError;
-      $scope.submission = true; //shows the error message
-    } else {
-
-        $scope.submission_result = data; // Show result from server in our <pre></pre> element
-      // if successful, bind success message to message
-      if ($scope.keys.length === 0) {
-
-        console.log('\t$scope.keys length is 0. going to calculate keys() ');
-        $scope.calculateKeys();
-      }
-      if ($scope.initial_measured == false) {
-        console.log('\t$scope.initial_measured = false ');
-        $scope.measured_time = angular.fromJson(data.snmp_time);
-        $scope.initial_measured = true;
-      }
+	$scope.removeMib = function() {
+		var lastMib = $scope.formData.snmp_oids.length-1;
+		$scope.formData.snmp_oids.splice(lastMib);
+	};
 
 
-      $scope.data = data;
-      var snmp_time = angular.fromJson(data.snmp_time);
-//      var snmp_label_time = data.snmp_label_time.toString();
-      var snmp_data = angular.fromJson (data.snmp_data); 
- //     var snmp_label_data = data.snmp_label_data.toString();
-      console.log( " : "+snmp_time + "\t"+ " : " + snmp_data );
-      var timeDiff = snmp_time - $scope.measured_time;
-      $scope.dataCounter = $scope.dataCounter + timeDiff;
-      $scope.measured_time = snmp_time;
-      console.log('setInterval counter is now at : ' + $scope.dataCounter);
-      $scope.graphData[0].values.push([$scope.dataCounter, snmp_data])
+	$scope.calculateKeys = function () {
+		$scope.keys.push("foo");
+		$scope.keys.push("bar");
+		$scope.graphData.push({ "key": "foo", "values": [] });
+		$scope.graphData.push({ "key": "bar", "values": [] });
+	};
 
-      $scope.submissionMessage = data.messageSuccess;
-      $scope.submission = true; //shows the success message
-    }
-  });
-};
+	$scope.graphs = [
+	{
+		"name": "Foos Only",
+			"height": 300,
+			"series": [ { label: 'Foo', key: 'foo', enabled: true } ]
+	},
+	{
+		"name": "Bars Only",
+		"height": 300,
+		"series": [ { label: 'Bar', key: 'bar', enabled: true } ]
+	}
+	];
 
-var stop;
+	var param = function(data) {
+		var returnString = '';
+		for (d in data){
+			if (data.hasOwnProperty(d))
+				returnString += d + '=' + data[d] + '&';
+		}
+		// Remove last ampersand and return
+		return returnString.slice( 0, returnString.length - 1 );
+	};
 
-$scope.clear = function(){
-  $scope.dataCounter = 0;
-  $scope.keys = [];
-  $scope.graphData = [];
+	$scope.fetchSNMP = function() {
+		$http({
+			method : 'POST',
+			url : 'cgi-bin/snmp.pl',
+			data : param($scope.formData), // pass in data as strings
+			headers : { 'Content-Type': 'application/x-www-form-urlencoded' } // set the headers so angular passing info as form data (not request payload)
+		})
+		.success(function(data) {
+			if (!data.success) {
+				// if not successful, bind errors to error variables
+				$scope.error_ip_address = data.errors.ip_address;
+				$scope.error_snmp_key = data.errors.snmp_key;
+				$scope.error_snmp_mib = data.errors.snmp_mib;
+				$scope.submissionMessage = data.messageError;
+				$scope.submission = true; //shows the error message
+			} else {
 
-  $scope.calculateKeys();
-};
+				$scope.submission_result = data; // Show result from server in our <pre></pre> element
+				// if successful, bind success message to message
+				if ($scope.keys.length === 0) {
 
-$scope.start = function() {
-  // Don't start again
-  if ( angular.isDefined(stop) ) return;
-  $scope.fetchSNMP();
-  if ( $scope.submission == true ){
-    stop = $interval(function() {
-      $scope.fetchSNMP();
-    }, 1000);
-  }
-};
+					console.log('\t$scope.keys length is 0. going to calculate keys() ');
+					$scope.calculateKeys();
+				}
+				if ($scope.initial_measured == false) {
+					console.log('\t$scope.initial_measured = false ');
+					$scope.measured_time = angular.fromJson(data.snmp_time);
+					$scope.initial_measured = true;
+				}
 
-$scope.stop = function() {
-  if (angular.isDefined(stop)) {
-    $interval.cancel(stop);
-    stop = undefined;
-  }
-};
 
-$scope.$on('$destroy', function() {
-  // Make sure that the interval is destroyed too
-  $scope.stop();
-});
+				$scope.data = data;
+				var snmp_time = angular.fromJson(data.snmp_time);
 
+
+				var timeDiff = snmp_time - $scope.measured_time;
+				$scope.dataCounter = $scope.dataCounter + timeDiff;
+				$scope.measured_time = snmp_time;
+				console.log('setInterval counter is now at : ' + $scope.dataCounter);
+
+
+				var snmp_data = angular.fromJson (data.snmp_data); 
+				console.log( " : "+snmp_time + "\t"+ " : " + snmp_data );
+
+				angular.forEach(data.snmp_data, function(value, key) {
+					console.log (key + ': ' + value);
+				}, $);
+
+				//		$scope.graphData[0].values.push([$scope.dataCounter, snmp_data])
+				$scope.submissionMessage = data.messageSuccess;
+				$scope.submission = true; //shows the success message
+			}
+		});
+	};
+
+	var stop;
+
+	$scope.clear = function(){
+		$scope.dataCounter = 0;
+		$scope.keys = [];
+		$scope.graphData = [];
+
+		$scope.calculateKeys();
+	};
+
+	$scope.start = function() {
+		// Don't start again
+		if ( angular.isDefined(stop) ) return;
+		$scope.fetchSNMP();
+		if ( $scope.submission == true ){
+			stop = $interval(function() {
+				$scope.fetchSNMP();
+			}, 1000);
+		}
+	};
+
+	$scope.stop = function() {
+		if (angular.isDefined(stop)) {
+			$interval.cancel(stop);
+			stop = undefined;
+		}
+	};
+
+	$scope.$on('$destroy', function() {
+		// Make sure that the interval is destroyed too
+		$scope.stop();
+	});
 });
 
 app.filter('graphDataFilter', function () {
-  return function (data, series) {
-    var r = [];
+	return function (data, series) {
+		var r = [];
 
-    for (var s = 0; s < series.length; s++) {
-      for (var i = 0; i < data.length; i++) {
-        if (data[i].key == series[s].key) {
-          r.push({ key: series[s].label, values: data[i].values, disabled: !series[s].enabled });
-        }
-      }
-    }
+		for (var s = 0; s < series.length; s++) {
+			for (var i = 0; i < data.length; i++) {
+				if (data[i].key == series[s].key) {
+					r.push({ key: series[s].label, values: data[i].values, disabled: !series[s].enabled });
+				}
+			}
+		}
 
-    return r;
-  };
+		return r;
+	};
 });
 
 app.directive('extendedChart', function () {
-  return {
-    restrict: 'E',
-  link: function ($scope) {
-    $scope.d3Call = function (data, chart) {
-      var svg = d3.select('#' + $scope.id + ' svg').datum(data);
+	return {
+		restrict: 'E',
+	link: function ($scope) {
+		$scope.d3Call = function (data, chart) {
+			var svg = d3.select('#' + $scope.id + ' svg').datum(data);
 
-      var path = svg.selectAll('path');
+			var path = svg.selectAll('path');
 
-      path.data(data)
-  .transition()
-  .ease("linear")
-  .duration(300);
+			path.data(data)
+	.transition()
+	.ease("linear")
+	.duration(300);
 
 return svg.transition()
-  .duration(300)
-  .call(chart);
-    };
-  }
-  };
+	.duration(300)
+	.call(chart);
+		};
+	}
+	};
 
 });
 

@@ -1,47 +1,72 @@
 
-<div class="container"> 
-<div ng-controller="snmp_controller">
-<br/>
-<button ng-click="start()">Start Fetching</button>
-<button ng-click="fetch_inteval()">Auto Determine Time Interval</button>
-<button ng-click="stop()">Stop Fetching</button>
-<button ng-click="clear()">Clear Data</button>
+<div class="container">
+	<div ng-controller="snmp_controller">
+		<h3>Commands</h3>
+		<hr/>
 
-<br/>
-<br/>
-<label for="name">ipAddress</label>
-<input type="text" name="ip_address" ng-model="formData.ip_address" ng-class="{'error' : error_ip_address}">
+		<button ng-click="start()">Start Fetching</button>
+		<button ng-click="fetch_inteval()">Auto Determine Time Interval</button>
+		<button ng-click="stop()">Stop Fetching</button>
+		<button ng-click="clear()">Clear Data</button>
 
-<label for="email">SNMP Key</label>
-<input type="text" name="snmp_key" ng-model="formData.snmp_key" ng-class="{'error' : error_snmp_key}">
+		<h4>SNMP Fields</h4>
+		<hr/>
 
-<label for="message">SNMP MIB</label>
-<input type="text" name="snmp_oids" value="1.1" ng-model="formData.snmp_oids" ng-class="{'error' : error_snmp_oids}">
+		<label for="name">ipAddress</label>
+		<input type="text" name="ip_address" ng-model="formData.ip_address" ng-class="{'error' : error_ip_address}">
 
-<div ng-class="{'submissionMessage' : submission}" ng-bind="submissionMessage"></div>
-<pre ng-model="result">
-{{submission_result}}
-</pre>
-<div ng-repeat="graph in graphs">
-<nvd3-line-chart
-data="graphData"
-filtername="'graphDataFilter'"
-filtervalue="graph.series"
-id="graph_line_{{$index}}"
-height="{{graph.height}}"
-width="800"
-showxaxis="true"
-showyaxis="true"
-forcey="[0]"
-tooltips="true"
-interactive="true"
-margin="{left:50,top:50,bottom:50,right:50}"
-showlegend="true"
-legendupdatestate="false"
-objectequality="true"
-nodata="No data to present...">
-<extended-chart><svg></svg></extended-chart>
-</nvd3-line-chart>
+		<label for="email">SNMP Key</label>
+		<input type="text" name="snmp_key" ng-model="formData.snmp_key" ng-class="{'error' : error_snmp_key}">
+
+		<!--	<div class="row"> -->
+		<h4>Dynamic Oid Fields</h4>
+		<hr/>
+
+		<fieldset  data-ng-repeat="oid in formData.snmp_oids track by $index">
+        <input type="text" ng-model="formData.snmp_oids[$index]"  placeholder="Enter oid number">
+
+			<button class="remove" ng-show="$last" ng-click="removeMib()">-</button>
+		</fieldset>
+		<button class="addmibs" ng-click="addNewMib()">Add oid</button>
+
+		<div id="mibDisplay">
+			<h4>Generated JSON</h4>
+			<hr/>
+			<pre> {{ formData }} 
+			</pre>	
+			<h4>Returned JSON</h4>
+			<hr/>
+			<pre ng-model="result">{{submission_result}}
+			</pre>
+
+		</div>
+
+
+		<div ng-class="{'submissionMessage' : submission}" ng-bind="submissionMessage"></div>
+
+
+
+		<div ng-repeat="graph in graphs">
+			<nvd3-line-chart
+			data="graphData"
+			filtername="'graphDataFilter'"
+			filtervalue="graph.series"
+			id="graph_line_{{$index}}"
+			height="{{graph.height}}"
+			width="800"
+			showxaxis="true"
+			showyaxis="true"
+			forcey="[0]"
+			tooltips="true"
+			interactive="true"
+			margin="{left:50,top:50,bottom:50,right:50}"
+			showlegend="true"
+			legendupdatestate="false"
+			objectequality="true"
+			nodata="No data to present...">
+			<extended-chart><svg></svg></extended-chart>
+			</nvd3-line-chart>
+		</div>
+	</div>
 </div>
-</div>
-</div>
+

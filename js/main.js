@@ -51,7 +51,7 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 	$scope.dataCounter = 0;
 	$scope.formData.ip_address = 'localhost';
 	$scope.formData.snmp_key = 'public';
-	$scope.formData.snmp_oids = [''];
+	$scope.formData.snmp_oids = ['1.3.6.1.2.1.4.1','1.3.6.1.2.1.4.3'];
 	$scope.graphs = [ { "name" : "SNMP Graph", "height": 300, "series" : [] }];
 
 	$scope.addNewMib = function() {
@@ -64,6 +64,7 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 	};
 
 	$scope.initControlls = function(){
+		console.log($scope.formData.snmp_oids.length);
 		for ( var pos = 0; pos < $scope.formData.snmp_oids.length ; pos++ ){
 			$scope.measured_value.push(0);
 		} 
@@ -119,7 +120,6 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 				$scope.submissionMessage = data.messageError;
 				$scope.submission = true; //shows the error message
 			} else {
-
 				$scope.submission_result = data; // Show result from server in our <pre></pre> element
 				// if successful, bind success message to message
 				if ($scope.keys.length === 0) {
@@ -132,20 +132,15 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 					$scope.measured_time = angular.fromJson(data.snmp_time);
 
 				}
-
 				$scope.data = data;
 				var snmp_time = angular.fromJson(data.snmp_time);
-
 				var timeDiff = snmp_time - $scope.measured_time;
 				$scope.dataCounter = $scope.dataCounter + timeDiff;
 				$scope.measured_time = snmp_time;
 				console.log('setInterval counter is now at : ' + $scope.dataCounter);
-
-				var snmp_data = angular.fromJson (data.snmp_data); 
+				var snmp_data = angular.fromJson (data.snmp_time); 
 				console.log( " : "+snmp_time + "\t"+ " : " + snmp_data );
-
 				angular.forEach(data.snmp_data, function(value, key) {
-
 					var $graph_pos = $scope.calculateKeyPosition(key);
 					console.log ('inside for each :: ' + $graph_pos );
 					if ( $graph_pos >= 0 ){
@@ -169,9 +164,7 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 		});
 		console.log('out 3');
 	};
-
 	var stop;
-
 	$scope.clear = function(){
 		$scope.initControlls();
 		$scope.dataCounter = 0;
@@ -244,5 +237,4 @@ app.directive('extendedChart', function () {
 	};
 
 });
-
 

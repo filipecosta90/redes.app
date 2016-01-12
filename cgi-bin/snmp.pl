@@ -84,12 +84,12 @@ else {
 		my %snmp_data;
 		foreach (%oids) {
 			my $oid_key = $_;
-			my $response;
-			my $string = $session->var_bind_list()->{$_};
-			if ( $oid_key eq "$sysUpTime.0"){
+		if ( $oid_key eq "$sysUpTime.0" || $oid_key eq ""){
 
 			}
 			else{
+				my $response;
+			my $string = $session->var_bind_list()->{$_};
 				push @{$snmp_data{$oid_key}}, $string;
 			}
 		}

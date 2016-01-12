@@ -38,19 +38,12 @@
 			<hr/>
 			<pre ng-model="result">{{submission_result}}
 			</pre>
-
 		</div>
 
-
 		<div ng-class="{'submissionMessage' : submission}" ng-bind="submissionMessage"></div>
-
-
-
 		<div ng-repeat="graph in graphs">
 			<nvd3-line-chart
 			data="graphData"
-			filtername="'graphDataFilter'"
-			filtervalue="graph.series"
 			id="graph_line_{{$index}}"
 			height="{{graph.height}}"
 			width="800"
@@ -69,4 +62,3 @@
 		</div>
 	</div>
 </div>
-

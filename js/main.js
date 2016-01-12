@@ -1,5 +1,5 @@
 /**
- * AngularJS Network Managment Assignment1
+ * AngularJS Network Managment Assignment2
  * @author Filipe Oliveira <a57816@alunos.uminho.pt>
  */
 
@@ -13,13 +13,13 @@ var app = angular.module('networkManagmentWebApp', ['ngRoute', 'nvd3ChartDirecti
  */
 app.config(['$routeProvider', function ($routeProvider) {
 	$routeProvider
-	// Home
-	.when("/", {templateUrl: "partials/home.html", controller: "PageCtrl"})
-	// Pages
-	.when("/about", {templateUrl: "partials/about.html", controller: "PageCtrl"})
-	.when("/contact", {templateUrl: "partials/contact.html", controller: "PageCtrl"})
-	// else 404
-	.otherwise("/404", {templateUrl: "partials/404.html", controller: "PageCtrl"});
+		// Home
+		.when("/", {templateUrl: "partials/home.html", controller: "PageCtrl"})
+		// Pages
+		.when("/about", {templateUrl: "partials/about.html", controller: "PageCtrl"})
+		.when("/contact", {templateUrl: "partials/contact.html", controller: "PageCtrl"})
+		// else 404
+		.otherwise("/404", {templateUrl: "partials/404.html", controller: "PageCtrl"});
 }]);
 
 
@@ -47,11 +47,12 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 	$scope.graphData = [];
 	$scope.initial_measured = false;
 	$scope.measured_time = 0;
-	$scope.measured_value = 0;
+	$scope.measured_value = [];
 	$scope.dataCounter = 0;
 	$scope.formData.ip_address = 'localhost';
 	$scope.formData.snmp_key = 'public';
-	$scope.formData.snmp_oids = ['1.3.6.1.2.1.4.3','1.3.6.1.2.1.4.3'];
+	$scope.formData.snmp_oids = [''];
+	$scope.graphs = [ { "name" : "SNMP Graph", "height": 300, "series" : [] }];
 
 	$scope.addNewMib = function() {
 		$scope.formData.snmp_oids.push("");
@@ -62,26 +63,22 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 		$scope.formData.snmp_oids.splice(lastMib);
 	};
 
-
-	$scope.calculateKeys = function () {
-		$scope.keys.push("foo");
-		$scope.keys.push("bar");
-		$scope.graphData.push({ "key": "foo", "values": [] });
-		$scope.graphData.push({ "key": "bar", "values": [] });
+	$scope.initControlls = function(){
+		for ( var pos = 0; pos < $scope.formData.snmp_oids.length ; pos++ ){
+			$scope.measured_value.push(0);
+		} 
 	};
 
-	$scope.graphs = [
-	{
-		"name": "Foos Only",
-			"height": 300,
-			"series": [ { label: 'Foo', key: 'foo', enabled: true } ]
-	},
-	{
-		"name": "Bars Only",
-		"height": 300,
-		"series": [ { label: 'Bar', key: 'bar', enabled: true } ]
-	}
-	];
+	$scope.calculateKeys = function () {
+		for ( var pos = 0; pos < $scope.formData.snmp_oids.length ; pos++ ){
+			$scope.measured_value.push(0);
+			var key_graph = $scope.formData.snmp_oids[pos];
+			$scope.keys.push( key_graph );
+			$scope.graphs[0].series.push({ label:'oid:' + key_graph, enabled: true, "key":  key_graph });
+			console.log($scope.graphs.series);
+			$scope.graphData.push({ "key":  key_graph, "values": [] });
+		}
+	};
 
 	var param = function(data) {
 		var returnString = '';
@@ -91,6 +88,19 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 		}
 		// Remove last ampersand and return
 		return returnString.slice( 0, returnString.length - 1 );
+	};
+
+	$scope.calculateCorrectKey = function (key) {
+		var key_size = key.length;
+		var cutted_key = key.substr(0, key_size - 2);
+		return cutted_key;
+	};
+
+	$scope.calculateKeyPosition = function (key) {
+		var key_size = key.length;
+		var cutted_key = key.substr(0, key_size - 2);
+		var index_key = $scope.formData.snmp_oids.indexOf(cutted_key);
+		return index_key;
 	};
 
 	$scope.fetchSNMP = function() {
@@ -120,37 +130,50 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 				if ($scope.initial_measured == false) {
 					console.log('\t$scope.initial_measured = false ');
 					$scope.measured_time = angular.fromJson(data.snmp_time);
-					$scope.initial_measured = true;
-				}
 
+				}
 
 				$scope.data = data;
 				var snmp_time = angular.fromJson(data.snmp_time);
-
 
 				var timeDiff = snmp_time - $scope.measured_time;
 				$scope.dataCounter = $scope.dataCounter + timeDiff;
 				$scope.measured_time = snmp_time;
 				console.log('setInterval counter is now at : ' + $scope.dataCounter);
 
-
 				var snmp_data = angular.fromJson (data.snmp_data); 
 				console.log( " : "+snmp_time + "\t"+ " : " + snmp_data );
 
 				angular.forEach(data.snmp_data, function(value, key) {
-					console.log (key + ': ' + value);
-				}, $);
 
-				//		$scope.graphData[0].values.push([$scope.dataCounter, snmp_data])
+					var $graph_pos = $scope.calculateKeyPosition(key);
+					console.log ('inside for each :: ' + $graph_pos );
+					if ( $graph_pos >= 0 ){
+						if ( $scope.initial_measured == false ){
+							$scope.measured_value[$graph_pos]= value;
+						}
+						var $difference_values = value - $scope.measured_value[$graph_pos];
+						console.log ( 'difference: ' + $difference_values + 'value: ' + value + ' measured:' + $scope.measured_value[$graph_pos] );
+						$scope.graphData[$graph_pos].values.push([$scope.dataCounter, $difference_values]);
+
+						//$scope.graphData[0].series[$scope.calculateCorrectKey(key)].values.push([$scope.dataCounter, $difference_values]);
+						console.log (key + ':['+ $graph_pos +'] ' + value + ' diff ' + $difference_values );
+					}
+				}, $);
 				$scope.submissionMessage = data.messageSuccess;
+				$scope.initial_measured = true;
 				$scope.submission = true; //shows the success message
+				console.log('out');
 			}
+			console.log('out2');
 		});
+		console.log('out 3');
 	};
 
 	var stop;
 
 	$scope.clear = function(){
+		$scope.initControlls();
 		$scope.dataCounter = 0;
 		$scope.keys = [];
 		$scope.graphData = [];
@@ -161,6 +184,7 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 	$scope.start = function() {
 		// Don't start again
 		if ( angular.isDefined(stop) ) return;
+		$scope.initControlls();
 		$scope.fetchSNMP();
 		if ( $scope.submission == true ){
 			stop = $interval(function() {
@@ -201,22 +225,22 @@ app.filter('graphDataFilter', function () {
 app.directive('extendedChart', function () {
 	return {
 		restrict: 'E',
-	link: function ($scope) {
-		$scope.d3Call = function (data, chart) {
-			var svg = d3.select('#' + $scope.id + ' svg').datum(data);
+		link: function ($scope) {
+			$scope.d3Call = function (data, chart) {
+				var svg = d3.select('#' + $scope.id + ' svg').datum(data);
 
-			var path = svg.selectAll('path');
+				var path = svg.selectAll('path');
 
-			path.data(data)
-	.transition()
-	.ease("linear")
-	.duration(300);
+				path.data(data)
+					.transition()
+					.ease("linear")
+					.duration(300);
 
-return svg.transition()
-	.duration(300)
-	.call(chart);
-		};
-	}
+				return svg.transition()
+					.duration(300)
+					.call(chart);
+			};
+		}
 	};
 
 });

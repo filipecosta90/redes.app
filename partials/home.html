@@ -3,14 +3,31 @@
 	<div ng-controller="snmp_controller">
 		<h3>Commands</h3>
 		<hr/>
-
+		
+		<h4>Data Fetching Controlls</h4>
 		<button ng-click="start()">Start Fetching</button>
-		<button ng-click="fetch_inteval()">Auto Determine Time Interval</button>
 		<button ng-click="stop()">Stop Fetching</button>
-		<button ng-click="clear()">Clear Data</button>
-
-		<h4>SNMP Fields</h4>
 		<hr/>
+		<button ng-click="clear()">Clear Data</button>
+		<hr/>
+		
+		
+		<h4>Sample Time Controlls</h4>
+
+		<label for="time_interval">Fecthing Interval</label>
+	
+		<input type="text" name="time_interval" ng-model="controlData.time_interval" ng-class="{'error' : error_time_interval}">
+				ms
+		&nbsp 
+		<br>
+		<label for="probe_interval"> Probing Interval</label>
+		<input type="text" name="probe_interval" ng-model="controlData.probe_interval" ng-class="{'error' : error_probe_interval}">
+		                                ms
+		<button ng-click="analyse()">Auto Determine Fetching Interval</button>
+	
+		<hr/>
+		<h4>SNMP Fields</h4>
+
 
 		<label for="name">ipAddress</label>
 		<input type="text" name="ip_address" ng-model="formData.ip_address" ng-class="{'error' : error_ip_address}">
@@ -18,9 +35,10 @@
 		<label for="email">SNMP Key</label>
 		<input type="text" name="snmp_key" ng-model="formData.snmp_key" ng-class="{'error' : error_snmp_key}">
 
+		<hr/>
 		<!--	<div class="row"> -->
 		<h4>Dynamic Oid Fields</h4>
-		<hr/>
+
 
 		<fieldset  data-ng-repeat="oid in formData.snmp_oids track by $index">
         <input type="text" ng-model="formData.snmp_oids[$index]"  placeholder="Enter oid number">
@@ -43,7 +61,7 @@
 		<div ng-class="{'submissionMessage' : submission}" ng-bind="submissionMessage"></div>
 		<div ng-repeat="graph in graphs">
 			<nvd3-line-chart
-			data="graphData"
+			data="graphData[$index]"
 			id="graph_line_{{$index}}"
 			height="{{graph.height}}"
 			width="800"

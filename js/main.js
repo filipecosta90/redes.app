@@ -49,11 +49,13 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 	$scope.keys = [];
 	$scope.graphData = [ [], []];
 	$scope.initial_measured = false;
+	$scope.graphs = [ { "name" : "SNMP Accumulated Graph", "height": 300, "series" : [] } 	,
+	{ "name" : "SNMP Difference Graph", "height": 300, "series" : [] } ];
 
 	//Control Data	
 	$scope.controlData = {};
-	$scope.controlData.time_interval = '1000';
-	$scope.controlData.probe_interval = '30000';
+	$scope.controlData.time_interval = 1000;
+	$scope.controlData.probe_interval = 30000;
 	$scope.probe_time = 0;
 	$scope.AnalyseRunning = false;
 	$scope.time_measured = false;
@@ -66,9 +68,7 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 	$scope.formData = {};
 	$scope.formData.ip_address = 'localhost';
 	$scope.formData.snmp_key = 'public';
-	$scope.formData.snmp_oids = ['1.3.6.1.2.1.4.1','1.3.6.1.2.1.4.3'];
-	$scope.graphs = [ { "name" : "SNMP Accumulated Graph", "height": 300, "series" : [] } ,	{ "name" : "SNMP Difference Graph", "height": 300, "series" : [] } ];
-
+	$scope.formData.snmp_oids = ['1.3.6.1.2.1.4.1','1.3.6.1.2.1.4.3', '1.3.6.1.2.1.6.10'];
 
 	// Methods
 	$scope.addNewMib = function() {
@@ -81,7 +81,7 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 	};
 
 	$scope.initControlls = function(){
-		console.log($scope.formData.snmp_oids.length);
+		$scope.probe_time = 0;	
 		for ( var pos = 0; pos < $scope.formData.snmp_oids.length ; pos++ ){
 			$scope.measured_value.push(0);
 		} 
@@ -129,7 +129,8 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 			method : 'POST',
 			url : 'cgi-bin/snmp.pl',
 			data : param($scope.formData), // pass in data as strings
-			headers : { 'Content-Type': 'application/x-www-form-urlencoded' } // set the headers so angular passing info as form data (not request payload)
+			// set the headers so angular passing info as form data (not request payload)
+			headers : { 'Content-Type': 'application/x-www-form-urlencoded' } 
 		})
 		.success(function(data) {
 			if (data != null ){
@@ -149,21 +150,22 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 					}
 					if ($scope.initial_measured == false) {
 						console.log('\t$scope.initial_measured = false ');
-						$scope.measured_time = angular.fromJson(data.snmp_time);
+						$scope.measured_time = 10 * JSON.parse(data.snmp_time);
 					}
-					var snmp_time = angular.fromJson(data.snmp_time);
+					var snmp_time = 10* JSON.parse(data.snmp_time);
 					var timeDiff = snmp_time - $scope.measured_time;
 					$scope.dataCounter = $scope.dataCounter + timeDiff;
 					$scope.measured_time = snmp_time;
 					angular.forEach(data.snmp_data, function(value, key) {
 						var $graph_pos = $scope.calculateKeyPosition(key);
 						if ( $graph_pos >= 0 ){
+							var valor = JSON.parse(value);
 							if ( $scope.initial_measured == false ){
-								$scope.measured_value[$graph_pos] = value;
+								$scope.measured_value[$graph_pos] = valor;
 							}
-							var $accum_values = value;
-							var $difference_values = value - $scope.measured_value[$graph_pos];
-							$scope.measured_value[$graph_pos] = value;
+							var $accum_values = valor;
+							var $difference_values = valor - $scope.measured_value[$graph_pos];
+							$scope.measured_value[$graph_pos] = valor;
 							$scope.graphData[0][$graph_pos].values.push([$scope.dataCounter, $difference_values]);
 							$scope.graphData[1][$graph_pos].values.push([$scope.dataCounter, $accum_values]);
 						}
@@ -201,44 +203,46 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 					}
 					if ($scope.time_measured == false) {
 						$scope.probe_time = 0;
-						$scope.measured_time = angular.fromJson(data.snmp_time);
+						$scope.measured_time = 10 * JSON.parse(data.snmp_time);
 					}
-					var snmp_time = angular.fromJson(data.snmp_time);
+					var snmp_time = 10 * JSON.parse(data.snmp_time);
 					var timeDiff = snmp_time - $scope.measured_time;
 					$scope.measured_time = snmp_time;
 					$scope.probe_time += timeDiff;
 					console.log('probe time: ' + $scope.probe_time );
-					angular.forEach(data.snmp_data, function(value, key) {
-						var valor = JSON.parse(value);
-						var $graph_pos = $scope.calculateKeyPosition(key);
-						if ( $graph_pos >= 0 ){
-							if ( $scope.time_measured == false ){
-								$scope.measured_value[$graph_pos]= valor;
+					$scope.probe_result = ' (probe time: ' + $scope.probe_time + ' of ' + $scope.controlData.probe_interval + ')';
+							angular.forEach(data.snmp_data, function(value, key) {
+								var valor = JSON.parse(value);
+								var $graph_pos = $scope.calculateKeyPosition(key);
+								if ( $graph_pos >= 0 ){
+									if ( $scope.time_measured == false ){
+										$scope.measured_value[$graph_pos]= valor;
+									}
+									if ( $scope.measured_value[$graph_pos] == valor ){
+										$scope.actualNoChange[$graph_pos] = $scope.actualNoChange[$graph_pos] + timeDiff;
+									}else {
+										$scope.actualNoChange[$graph_pos] = 0;
+									}
+									if ( $scope.NoChangeInterval[$graph_pos] < $scope.actualNoChange[$graph_pos] ){
+										$scope.NoChangeInterval[$graph_pos] = $scope.actualNoChange[$graph_pos];	
+									}
+									$scope.measured_value[$graph_pos] = valor;
+								}
+							}, $);
+							$scope.controlData.time_interval = 2 * Math.min.apply( Math , $scope.NoChangeInterval );
+							$scope.time_measured = true;
+							$scope.submissionMessage = data.messageSuccess;
+							$scope.submission = true; //shows the success message
+							if ($scope.probe_time >= $scope.controlData.probe_interval ){
+								$interval.cancel(stopAnalyse);	
+								$scope.AnalyseRunning = false;	
 							}
-							if ( $scope.measured_value[$graph_pos] == valor ){
-								$scope.actualNoChange[$graph_pos] = $scope.actualNoChange[$graph_pos] + timeDiff;
-							}else {
-								$scope.actualNoChange[$graph_pos] = 0;
-							}
-							if ( $scope.NoChangeInterval[$graph_pos] < $scope.actualNoChange[$graph_pos] ){
-								$scope.NoChangeInterval[$graph_pos] = $scope.actualNoChange[$graph_pos];	
-							}
-							$scope.measured_value[$graph_pos] = valor;
-						}
-					}, $);
-					$scope.controlData.time_interval = 2 * Math.min.apply( Math , $scope.NoChangeInterval );
-					$scope.time_measured = true;
-					$scope.submissionMessage = data.messageSuccess;
-					$scope.submission = true; //shows the success message
-					if ($scope.probe_time >= $scope.controlData.probe_interval ){
-						console.log ('probe time achieved');
-						$interval.cancel(stopAnalyse);	
-					}
 				}
 			}
 		});
 	};
 	var stop;
+
 	$scope.clear = function(){
 		$scope.initControlls();
 		$scope.dataCounter = 0;
@@ -274,8 +278,6 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 			stopAnalyse = undefined;
 		}
 	};
-
-
 
 	$scope.analyse = function(){
 		// Don't start again

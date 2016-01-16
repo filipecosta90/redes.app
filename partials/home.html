@@ -3,28 +3,27 @@
 	<div ng-controller="snmp_controller">
 		<h3>Commands</h3>
 		<hr/>
-		
+
 		<h4>Data Fetching Controlls</h4>
 		<button ng-click="start()">Start Fetching</button>
 		<button ng-click="stop()">Stop Fetching</button>
-		<hr/>
 		<button ng-click="clear()">Clear Data</button>
 		<hr/>
-		
-		
-		<h4>Sample Time Controlls</h4>
+
+
+		<h4>Sample Time Controlls {{probe_result}}</h4>
 
 		<label for="time_interval">Fecthing Interval</label>
-	
+
 		<input type="text" name="time_interval" ng-model="controlData.time_interval" ng-class="{'error' : error_time_interval}">
-				ms
+		ms
 		&nbsp 
 		<br>
 		<label for="probe_interval"> Probing Interval</label>
 		<input type="text" name="probe_interval" ng-model="controlData.probe_interval" ng-class="{'error' : error_probe_interval}">
-		                                ms
+		ms 
 		<button ng-click="analyse()">Auto Determine Fetching Interval</button>
-	
+
 		<hr/>
 		<h4>SNMP Fields</h4>
 
@@ -39,10 +38,8 @@
 		<!--	<div class="row"> -->
 		<h4>Dynamic Oid Fields</h4>
 
-
 		<fieldset  data-ng-repeat="oid in formData.snmp_oids track by $index">
-        <input type="text" ng-model="formData.snmp_oids[$index]"  placeholder="Enter oid number">
-
+			<input type="text" ng-model="formData.snmp_oids[$index]"  placeholder="Enter oid number">
 			<button class="remove" ng-show="$last" ng-click="removeMib()">-</button>
 		</fieldset>
 		<button class="addmibs" ng-click="addNewMib()">Add oid</button>
@@ -58,25 +55,50 @@
 			</pre>
 		</div>
 
+		<hr/>
 		<div ng-class="{'submissionMessage' : submission}" ng-bind="submissionMessage"></div>
-		<div ng-repeat="graph in graphs">
-			<nvd3-line-chart
-			data="graphData[$index]"
-			id="graph_line_{{$index}}"
-			height="{{graph.height}}"
-			width="800"
-			showxaxis="true"
-			showyaxis="true"
-			forcey="[0]"
-			tooltips="true"
-			interactive="true"
-			margin="{left:50,top:50,bottom:50,right:50}"
-			showlegend="true"
-			legendupdatestate="false"
-			objectequality="true"
-			nodata="No data to present...">
-			<extended-chart><svg></svg></extended-chart>
+		<div >
+			<div class="chart-title"><h4>SNMP Value Differences by Probing Time</h4></div>
+	<nvd3-line-chart
+       data="graphData[0]"
+       id="graph_line_0"
+       height="300"
+       width="800"
+       showxaxis="true"
+       showyaxis="true"
+       forcey="[0]"
+       tooltips="true"
+       interactive="true"
+       margin="{left:50,top:50,bottom:50,right:50}"
+       showlegend="true"
+       legendupdatestate="false"
+       objectequality="true"
+       nodata="No data to present...">
+				<extended-chart><svg></svg></extended-chart>
 			</nvd3-line-chart>
 		</div>
+
+		<div >
+
+			<div class="chart-title"><h4>SNMP Accumulated Values by Probing Time</h4></div>
+	<nvd3-line-chart
+       data="graphData[1]"
+       id="graph_line_1"
+       height="300"
+       width="800"
+       showxaxis="true"
+       showyaxis="true"
+       forcey="[0]"
+       tooltips="true"
+       interactive="true"
+       margin="{left:50,top:50,bottom:50,right:50}"
+       showlegend="true"
+       legendupdatestate="false"
+       objectequality="true"
+       nodata="No data to present...">
+				<extended-chart><svg></svg></extended-chart>
+			</nvd3-line-chart>
+		</div>
+	
+		</div>
 	</div>
-</div>

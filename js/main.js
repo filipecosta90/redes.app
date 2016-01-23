@@ -54,7 +54,7 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 
 	//Control Data	
 	$scope.controlData = {};
-	$scope.controlData.time_interval = 1000;
+	$scope.controlData.time_interval = 5000;
 	$scope.controlData.probe_interval = 30000;
 	$scope.probe_time = 0;
 	$scope.AnalyseRunning = false;
@@ -68,7 +68,7 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 	$scope.formData = {};
 	$scope.formData.ip_address = 'localhost';
 	$scope.formData.snmp_key = 'public';
-	$scope.formData.snmp_oids = ['1.3.6.1.2.1.4.1','1.3.6.1.2.1.4.3', '1.3.6.1.2.1.6.10'];
+	$scope.formData.snmp_oids = ['1.3.6.1.2.1.4.3', '1.3.6.1.2.1.4.10'];
 
 	// Methods
 	$scope.addNewMib = function() {

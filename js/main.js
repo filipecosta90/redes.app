@@ -47,7 +47,7 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 	// Graph Data
 	$scope.dataCounter = 0;
 	$scope.keys = [];
-	$scope.graphData = [ [], []];
+	$scope.graphData = [ [], [], [], [] ];
 	$scope.initial_measured = false;
 	$scope.graphs = [ { "name" : "SNMP Accumulated Graph", "height": 300, "series" : [] } 	,
 	{ "name" : "SNMP Difference Graph", "height": 300, "series" : [] } ];
@@ -56,6 +56,8 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 	$scope.controlData = {};
 	$scope.controlData.time_interval = 5000;
 	$scope.controlData.probe_interval = 30000;
+	$scope.controlData.rangeMax=0;
+	$scope.controlData.fixRange = false;
 	$scope.probe_time = 0;
 	$scope.AnalyseRunning = false;
 	$scope.time_measured = false;
@@ -70,6 +72,15 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 	$scope.formData.snmp_key = 'public';
 	$scope.formData.snmp_oids = ['1.3.6.1.2.1.4.3', '1.3.6.1.2.1.4.10'];
 
+	$scope.rangeSlider = {
+		minValue: 0,
+		maxValue: 90,
+		options: {
+			floor: 0,
+			ceil: 100,
+			step: 1
+		}
+	};
 	// Methods
 	$scope.addNewMib = function() {
 		$scope.formData.snmp_oids.push("");
@@ -98,8 +109,11 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 			$scope.graphs[1].series.push({ label:'oid:' + key_graph, enabled: true, key:  key_graph });
 			$scope.graphData[0].push({ "key":  key_graph, "values": [] });
 			$scope.graphData[1].push({ "key":  key_graph, "values": [] });
+			$scope.graphData[2].push({ "key":  key_graph, "values": [] });
+			$scope.graphData[3].push({ "key":  key_graph, "values": [] });
 		}
 	};
+
 
 	var param = function(data) {
 		var returnString = '';
@@ -113,14 +127,32 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 
 	$scope.calculateCorrectKey = function (key) {
 		var key_size = key.length;
-		var cutted_key = key.substr(0, key_size - 2);
+		var cutted_key;
+		if ( key.lastIndexOf('0') == (key_size - 1) ){
+			cutted_key = key.substr(0, key_size - 2);
+			console.log("cutted" + key );
+		}
+		else {
+			console.log ("not cutted" + key);
+			cutted_key = key;
+		}
 		return cutted_key;
 	};
 
 	$scope.calculateKeyPosition = function (key) {
 		var key_size = key.length;
-		var cutted_key = key.substr(0, key_size - 2);
+		var cutted_key;
+		if ( key.lastIndexOf('0') == (key_size - 1) ){
+			cutted_key = key.substr(0, key_size - 2);
+		}
+		else {
+			cutted_key = key;
+		}
 		var index_key = $scope.formData.snmp_oids.indexOf(cutted_key);
+		if (index_key == -1 && $scope.formData.snmp_oids.length == 1 ){
+			console.log ("altered");
+			return 0;
+		}
 		return index_key;
 	};
 
@@ -157,7 +189,9 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 					$scope.dataCounter = $scope.dataCounter + timeDiff;
 					$scope.measured_time = snmp_time;
 					angular.forEach(data.snmp_data, function(value, key) {
+						console.log ("key: " + key + " value: " + value );
 						var $graph_pos = $scope.calculateKeyPosition(key);
+						console.log( "position" + $graph_pos );
 						if ( $graph_pos >= 0 ){
 							var valor = JSON.parse(value);
 							if ( $scope.initial_measured == false ){
@@ -168,6 +202,19 @@ app.controller('snmp_controller', function($scope,  $http,  $log, $interval){
 							$scope.measured_value[$graph_pos] = valor;
 							$scope.graphData[0][$graph_pos].values.push([$scope.dataCounter, $difference_values]);
 							$scope.graphData[1][$graph_pos].values.push([$scope.dataCounter, $accum_values]);
+							var min = $scope.controlData.rangeMin;
+							var max = $scope.graphData[0][$graph_pos].values.length;
+							if ($scope.controlData.fixRange){
+								min = max - $scope.controlData.rangeFix;
+								if (min < 0 ){
+									min = 0;
+								}
+								$scope.controlData.rangeMin = min;	
+							}
+							$scope.controlData.rangeMax=max;
+							$scope.graphData[2][$graph_pos].values = $scope.graphData[0][$graph_pos].values.slice(min,max);
+							$scope.graphData[3][$graph_pos].values = $scope.graphData[1][$graph_pos].values.slice(min,max);
+
 						}
 					}, $);
 					$scope.submissionMessage = data.messageSuccess;

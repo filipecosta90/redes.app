@@ -44,6 +44,24 @@
 		</fieldset>
 		<button class="addmibs" ng-click="addNewMib()">Add oid</button>
 
+		<hr/>
+		<h4>Step Range Slider</h4>
+
+		<label for="rangeMin">Step Range Min:</label>
+		<input type="text" name = "rangeMin" ng-model="controlData.rangeMin" >
+		<label for="rangeMax">Step Range Max:</label>
+		<input type="text" name = "rangeMax" ng-model="controlData.rangeMax" >
+
+		&nbsp 
+		<label for="rangeMax"> Fix Range?:</label>
+		&nbsp 
+		<input type="checkbox"  ng-model="controlData.fixRange">
+		&nbsp 
+		<input type="text" ng-model="controlData.rangeFix" >
+
+		<input id="rangeSlider" type="range" min="0" max="{{controlData.rangeMax}}" max="500" ng-model="controlData.rangeMin" />
+
+		<hr/>
 		<div id="mibDisplay">
 			<h4>Generated JSON</h4>
 			<hr/>
@@ -59,21 +77,21 @@
 		<div ng-class="{'submissionMessage' : submission}" ng-bind="submissionMessage"></div>
 		<div >
 			<div class="chart-title"><h4>SNMP Value Differences by Probing Time</h4></div>
-	<nvd3-line-chart
-       data="graphData[0]"
-       id="graph_line_0"
-       height="300"
-       width="800"
-       showxaxis="true"
-       showyaxis="true"
-       forcey="[0]"
-       tooltips="true"
-       interactive="true"
-       margin="{left:50,top:50,bottom:50,right:50}"
-       showlegend="true"
-       legendupdatestate="false"
-       objectequality="true"
-       nodata="No data to present...">
+			<nvd3-line-chart
+	data="graphData[2]"
+ id="graph_line_0"
+ height="300"
+ width="800"
+ showxaxis="true"
+ showyaxis="true"
+ forcey="[0]"
+ tooltips="true"
+ interactive="true"
+ margin="{left:50,top:50,bottom:50,right:50}"
+ showlegend="true"
+ legendupdatestate="false"
+ objectequality="true"
+ nodata="No data to present...">
 				<extended-chart><svg></svg></extended-chart>
 			</nvd3-line-chart>
 		</div>
@@ -81,24 +99,24 @@
 		<div >
 
 			<div class="chart-title"><h4>SNMP Accumulated Values by Probing Time</h4></div>
-	<nvd3-line-chart
-       data="graphData[1]"
-       id="graph_line_1"
-       height="300"
-       width="800"
-       showxaxis="true"
-       showyaxis="true"
-       forcey="[0]"
-       tooltips="true"
-       interactive="true"
-       margin="{left:50,top:50,bottom:50,right:50}"
-       showlegend="true"
-       legendupdatestate="false"
-       objectequality="true"
-       nodata="No data to present...">
+			<nvd3-line-chart
+	data="graphData[3]"
+ id="graph_line_1"
+ height="300"
+ width="800"
+ showxaxis="true"
+ showyaxis="true"
+ forcey="[0]"
+ tooltips="true"
+ interactive="true"
+ margin="{left:50,top:50,bottom:50,right:50}"
+ showlegend="true"
+ legendupdatestate="false"
+ objectequality="true"
+ nodata="No data to present...">
 				<extended-chart><svg></svg></extended-chart>
 			</nvd3-line-chart>
 		</div>
-	
+
 		</div>
 	</div>
